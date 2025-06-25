@@ -17,8 +17,15 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('display_name')->nullable();
+            $table->string('avatar')->nullable();
+            $table->enum('subscription_tiers', ['free', 'premium', 'team'])->default('free');
+            $table->timestamp('last_active_at')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
+            $table->index(['email']);
+            $table->index(['subscription_tiers']);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
