@@ -8,6 +8,7 @@ class Habit extends Model
 {
     protected $fillable =[
         'user_id',
+        'name',
         'description',
         'category',
         'frequency',
@@ -23,6 +24,12 @@ class Habit extends Model
         'difficulty',
 
     ];
+
+    protected $casts = [
+        'reminder_days' => 'array',
+        'is_active' => 'boolean'
+    ];
+
 
     public function user() {
         return $this->belongsTo(User::class);
