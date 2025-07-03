@@ -135,4 +135,57 @@ class HabitController extends Controller
             return response()->json(["errors"=>$e->getMessage()]);
         }
     }
+
+    /**
+     * Marquer une habitude comme complétée pour aujourd’hui
+     */
+    public function markComplete(string $id)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(["errors" => "Unauthenticated"], 401);
+        }
+
+        // Vérifier que l'habitude existe et appartient bien à l'utilisateur
+        $habit = $user->habits()->find($id);
+
+        if (!$habit) {
+            return response()->json(["errors" => "Habit not found or unauthorized"], 404);
+        }
+
+        try {
+            $today = now()->toDateString();
+
+            $tracking = $habit->trackings()->firstOrCreate(
+                ['date' => $today],
+                ['completed' => true]
+            );
+
+            if (!$tracking->wasRecentlyCreated) {
+                $tracking->completed = true;
+                $tracking->save();
+            }
+
+            // Mettre à jour les stats proprement
+            $habit->total_completions++;
+            $habit->current_streak++;
+
+            if ($habit->current_streak > $habit->longest_streak) {
+                $habit->longest_streak = $habit->current_streak;
+            }
+
+            $habit->save();
+
+            return response()->json([
+                "success" => true,
+                "message" => "Habit marked as complete for today",
+                "data" => $tracking
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                "errors" => $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -16,4 +16,5 @@ Route::post('login',[AuthController::class, 'login']);
 //Route proteger
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('habits', HabitController::class);
+    Route::post('habits/{id}/complete',[HabitController::class, 'markComplete']);
 });
